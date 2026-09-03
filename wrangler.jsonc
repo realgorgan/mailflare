@@ -12,9 +12,6 @@
 		"binding": "ASSETS",
 		"directory": ".open-next/assets",
 	},
-	"images": {
-		"binding": "IMAGES",
-	},
 	"services": [
 		{
 			"binding": "WORKER_SELF_REFERENCE",
@@ -37,14 +34,11 @@
 			],
 		},
 	],
-	"workflows": [
-		{
-			"name": "mailflare-database-backup",
-			"binding": "DATABASE_BACKUP_WORKFLOW",
-			"class_name": "DatabaseBackupWorkflow",
-			"schedules": ["0 2 * * *"],
-		},
-	],
+	"triggers": {
+		"crons": [
+			"15 2 * * *"
+		]
+	},
 	"ratelimits": [
 		{
 			"name": "LOGIN_RATE_LIMIT",
@@ -59,23 +53,28 @@
 		"enabled": true,
 	},
 	"upload_source_maps": true,
-	"send_email": [
-		{
-			"name": "EMAIL",
-			"remote": true,
-		},
-	],
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "mailflare",
 			"migrations_dir": "drizzle/migrations",
 		},
+		{
+			"binding": "mailflare",
+			"database_name": "mailflare",
+			"database_id": "7cd0b539-659c-4d69-97f9-02b2d8684bdf",
+			"remote": true
+		},
 	],
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
 			"bucket_name": "mailflare-raw",
+		},
+		{
+			"bucket_name": "mailflare-raw",
+			"binding": "mailflare_raw",
+			"remote": true
 		},
 	],
 	"queues": {
@@ -84,19 +83,10 @@
 				"binding": "INBOUND_QUEUE",
 				"queue": "mailflare-inbound",
 			},
-			{
-				"binding": "OUTBOUND_QUEUE",
-				"queue": "mailflare-outbound",
-			},
 		],
 		"consumers": [
 			{
 				"queue": "mailflare-inbound",
-				"max_batch_size": 5,
-				"max_retries": 3,
-			},
-			{
-				"queue": "mailflare-outbound",
 				"max_batch_size": 5,
 				"max_retries": 3,
 			},

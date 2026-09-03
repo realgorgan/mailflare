@@ -9,6 +9,7 @@ import { getAuthorizedSenderAddress } from "@/lib/email/sender";
 import { createAuditLog } from "@/lib/mailboxes/audit";
 import { storeMessageAttachments, validateAttachments } from "@/lib/email/attachments";
 import type { AttachmentContent } from "@/lib/email/attachment-types";
+import { getEmailSender } from "@/lib/email/outbound-sender";
 
 export type SendEmailInput = {
 	userId: string;
@@ -70,29 +71,14 @@ export async function sendEmail(env: CloudflareEnv, input: SendEmailInput): Prom
 	});
 
 	try {
-		const response = await env.EMAIL.send({
+		const response = await getEmailSender(env).send({
 			from: sender.fromAddr,
 			to: input.to,
 			subject: input.subject,
 			headers: input.headers,
 			html: input.html,
 			text: input.text,
-			attachments: attachments.map((attachment) =>
-				attachment.disposition === "inline" && attachment.contentId
-					? {
-							filename: attachment.filename,
-							type: attachment.type,
-							content: attachment.content,
-							disposition: "inline" as const,
-							contentId: attachment.contentId,
-						}
-					: {
-							filename: attachment.filename,
-							type: attachment.type,
-							content: attachment.content,
-							disposition: "attachment" as const,
-						},
-			),
+			attachments,
 		});
 
 		await db
@@ -125,13 +111,4 @@ export async function sendEmail(env: CloudflareEnv, input: SendEmailInput): Prom
 		await dispatchWebhooks(env, input.userId, "message.failed", { messageId, error });
 		throw err;
 	}
-}
-
-export type OutboundQueueMessage = SendEmailInput & { jobId?: string };
-
-export async function processOutboundQueue(
-	env: CloudflareEnv,
-	payload: OutboundQueueMessage,
-): Promise<void> {
-	await sendEmail(env, payload);
 }

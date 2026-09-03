@@ -193,6 +193,10 @@ export const messages = sqliteTable(
 		htmlBody: text("html_body"),
 		rawR2Key: text("raw_r2_key"),
 		status: text("status").notNull().default("received"),
+		retentionActiveAt: integer("retention_active_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		archiveAt: integer("archive_at", { mode: "timestamp" }),
 		read: integer("read", { mode: "boolean" }).notNull().default(false),
 		starred: integer("starred", { mode: "boolean" }).notNull().default(false),
 		snoozedUntil: integer("snoozed_until", { mode: "timestamp" }),
@@ -205,6 +209,8 @@ export const messages = sqliteTable(
 		index("messages_user_created_idx").on(t.userId, t.createdAt),
 		index("messages_mailbox_idx").on(t.mailboxId),
 		index("messages_folder_idx").on(t.folderId),
+		index("messages_retention_idx").on(t.status, t.retentionActiveAt),
+		index("messages_archive_expiry_idx").on(t.status, t.archiveAt),
 	],
 );
 

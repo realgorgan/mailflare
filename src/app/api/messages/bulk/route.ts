@@ -52,10 +52,13 @@ export async function POST(request: Request) {
 		folderId = null;
 	}
 
+	const now = new Date();
 	const values = {
 		...(status ? { status } : {}),
 		...(read !== null ? { read } : {}),
 		...(folderId !== undefined ? { folderId } : {}),
+		...(payload.action === "archive" ? { archiveAt: now } : {}),
+		...(payload.action === "inbox" || payload.action === "folder" ? { archiveAt: null, retentionActiveAt: now } : {}),
 	};
 
 	if (Object.keys(values).length === 0) {

@@ -88,7 +88,7 @@ export async function processInboundMessage(
 			snippet,
 			textBody: parsed.text,
 			htmlBody: parsed.html,
-			rawR2Key: payload.rawR2Key,
+			rawR2Key: null,
 			status: destination.status,
 			threadId: parsed.messageId,
 		});
@@ -98,6 +98,9 @@ export async function processInboundMessage(
 		await db.delete(messages).where(eq(messages.id, messageId));
 		throw error;
 	}
+	// Parsed message data and attachments are the durable copies; do not retain the
+	// larger raw RFC822 object once queue processing is complete.
+	await env.BUCKET.delete(payload.rawR2Key);
 
 	if (destination.status === "received") {
 		try {

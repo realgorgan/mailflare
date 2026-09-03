@@ -5,7 +5,7 @@ import {
 	storeRawToR2,
 	type InboundQueueMessage,
 } from "./src/lib/email/inbound";
-import { processOutboundQueue, type OutboundQueueMessage } from "./src/lib/email/send";
+import { runMessageRetention } from "./src/lib/messages/retention";
 import { getDb } from "./src/db";
 import { resolveInboundAddress } from "./src/lib/email/routing";
 import { isInboundQueueMessage } from "./worker-utils";
@@ -16,7 +16,6 @@ import {
 	MAILFLARE_FORWARDED_HEADER,
 } from "./src/lib/email/account-forwarding";
 export { RealtimeHub } from "./src/lib/realtime/hub";
-export { DatabaseBackupWorkflow } from "./src/lib/backups/workflow";
 
 export default {
 	async fetch(request: Request, env: CloudflareEnv, ctx: ExecutionContext) {
@@ -74,16 +73,17 @@ export default {
 	async queue(batch: MessageBatch, env: CloudflareEnv): Promise<void> {
 		for (const msg of batch.messages) {
 			try {
-				if (isInboundQueueMessage(msg.body)) {
-					await processInboundMessage(env, msg.body);
-				} else {
-					await processOutboundQueue(env, msg.body as OutboundQueueMessage);
-				}
+				if (!isInboundQueueMessage(msg.body)) throw new Error("Unexpected queue payload");
+				await processInboundMessage(env, msg.body);
 				msg.ack();
 			} catch (err) {
 				console.error("Queue processing failed", err);
 				msg.retry({ delaySeconds: 10 });
 			}
 		}
+	},
+
+	async scheduled(_controller: ScheduledController, env: CloudflareEnv): Promise<void> {
+		await runMessageRetention(env);
 	},
 } satisfies ExportedHandler<CloudflareEnv>;
