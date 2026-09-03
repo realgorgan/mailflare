@@ -26,29 +26,14 @@
       "CF_TOKEN": {
         "description": "Runtime Cloudflare API token used by Mailflare onboarding to call the Zones and Email Routing APIs. Cloudflare's deploy/build token is not passed to the app, so create this separately at https://dash.cloudflare.com/profile/api-tokens with `Zone Read`, `Email Routing Edit`, `Email Sending Edit`, and `Email Routing Rules Write` permissions for the zones you will connect. Paste only the token secret value, without `Bearer`."
       },
-      "CF_AID": {
-        "description": "Cloudflare account ID. Required for automatic database backups."
-      },
-      "D1_DATABASE_ID": {
-        "description": "Cloudflare D1 database ID for the mailflare database. Required for automatic database backups."
-      },
-      "D1_BACKUP_TOKEN": {
-        "description": "Optional Cloudflare API token allowed to export the target D1 database. Store this as a secret. If omitted, backups reuse CF_TOKEN."
+      "BREVO_API_KEY": {
+        "description": "Brevo API key used to send mail. Verify each sender domain in Brevo first; its free allowance applies."
       },
       "TURNSTILE_SECRET_KEY": {
         "description": "Cloudflare Turnstile secret key used to verify login and first-run registration challenges. Pair with NEXT_PUBLIC_TURNSTILE_SITE_KEY at build time."
       },
       "NEXT_PUBLIC_TURNSTILE_SITE_KEY": {
         "description": "Cloudflare Turnstile public site key used by the login and first-run registration widgets."
-      },
-      "GITHUB_UPDATE_TOKEN": {
-        "description": "Fine-grained GitHub token for the installation repository with Actions: write permission, Contents: write read permission. Used only by the admin update endpoint to dispatch update.yml."
-      },
-      "GITHUB_UPDATE_REF": {
-        "description": "Optional branch used to dispatch updates. Leave blank to use the repository default branch."
-      },
-      "GITHUB_UPDATE_REPO": {
-        "description": "Your github repository that connect to cloudflare worker"
       },
       "CF_EMAIL": {
         "description": "Legacy Global API Key auth only. Use this with `CF_API_KEY` instead of `CF_TOKEN`."

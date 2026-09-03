@@ -13,11 +13,8 @@ export class BackupWorkflowUnavailableError extends Error {
 }
 
 export function getBackupWorkflowBinding(env: CloudflareEnv): BackupWorkflowBinding {
-	const workflow = env.DATABASE_BACKUP_WORKFLOW as BackupWorkflowBinding | undefined;
-	if (!workflow || typeof workflow.create !== "function") {
-		throw new BackupWorkflowUnavailableError();
-	}
-	return workflow;
+	void env;
+	throw new BackupWorkflowUnavailableError();
 }
 
 export function isBackupDue(
