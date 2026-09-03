@@ -14,7 +14,7 @@ The Worker name must remain `mailflare`. Before starting, create the required `C
 
 ## Step 1: Deploy mailflare
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hieunc229/mailflare)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/realgorgan/mailflare)
 
 1. Click **Deploy to Cloudflare** above and sign in to Cloudflare if prompted.
 2. Choose the Cloudflare account that owns the domain you want to use.
