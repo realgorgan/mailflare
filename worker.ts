@@ -15,7 +15,9 @@ import {
 	getAccountForwardingDestination,
 	MAILFLARE_FORWARDED_HEADER,
 } from "./src/lib/email/account-forwarding";
-export { RealtimeHub } from "./src/lib/realtime/hub";
+import { RealtimeHub as RealtimeHubBase } from "./src/lib/realtime/hub";
+
+export class RealtimeHub extends RealtimeHubBase {}
 
 export default {
 	async fetch(request: Request, env: CloudflareEnv, ctx: ExecutionContext) {
