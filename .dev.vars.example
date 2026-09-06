@@ -1,8 +1,10 @@
 # Preferred: scoped API token.
 # This is an app runtime token, not the Cloudflare deploy/build token.
 CF_TOKEN=your_api_token_with_zone_email_permissions
-# Required for sending mail through SMTP2GO. Verify each sender domain with SMTP2GO first.
-SMTP2GO_API_KEY=your_smtp2go_api_key
+# Optional: lets the admin dashboard trigger the GitHub update workflow.
+# GITHUB_UPDATE_TOKEN=github_pat_with_actions_write
+# GITHUB_UPDATE_REPO=owner/repo
+# GITHUB_UPDATE_REF=main
 
 # Legacy Global API Key alternative. Use this only instead of CF_TOKEN.
 # CF_EMAIL=you@example.com

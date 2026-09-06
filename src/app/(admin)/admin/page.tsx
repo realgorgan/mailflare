@@ -40,7 +40,7 @@ const sections = [
 	// 	icon: Webhook,
 	// },
 	// {
-	// 	href: "/settings",
+	// 	href: "/settings/account",
 	// 	title: "Account",
 	// 	description: "View personal account and platform configuration.",
 	// 	icon: Settings,

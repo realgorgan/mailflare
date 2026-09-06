@@ -12,7 +12,8 @@ import {
 	PROFILE_AVATAR_CHANGED_EVENT,
 	getProfileAvatarUrl,
 } from "@/lib/profile/avatar-client";
-import type { ProfileAvatarChangedDetail } from "@/lib/profile/types";
+import { PROFILE_NAME_CHANGED_EVENT } from "@/lib/profile/name-client";
+import type { ProfileAvatarChangedDetail, ProfileNameChangedDetail } from "@/lib/profile/types";
 import { MAILBOX_AVATAR_CHANGED_EVENT } from "@/lib/mailboxes/avatar-client";
 import type { MailboxAvatarChangedDetail } from "@/lib/mailboxes/avatar-client-types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -148,6 +149,16 @@ export function MailboxSelector() {
 	}, []);
 
 	useEffect(() => {
+		function onNameChanged(event: Event) {
+			const { name } = (event as CustomEvent<ProfileNameChangedDetail>).detail;
+			setUser((current) => current ? { ...current, name } : current);
+		}
+
+		window.addEventListener(PROFILE_NAME_CHANGED_EVENT, onNameChanged);
+		return () => window.removeEventListener(PROFILE_NAME_CHANGED_EVENT, onNameChanged);
+	}, []);
+
+	useEffect(() => {
 		function onMailboxAvatarChanged(event: Event) {
 			const detail = (event as CustomEvent<MailboxAvatarChangedDetail>).detail;
 			if (!detail?.mailboxId || !detail.url) return;
@@ -244,7 +255,7 @@ export function MailboxSelector() {
 							Calendar
 						</Link>
 						<Link
-							href="/settings"
+							href="/settings/account"
 							onClick={() => setOpen(false)}
 							className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-[#f2f6fc]"
 						>
