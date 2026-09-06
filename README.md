@@ -4,7 +4,7 @@
 
 Mailflare is a self-hosted email inbox for custom domains, built on Cloudflare.
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hieunc229/mailflare)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/realgorgan/mailflare)
 
 ![Mailflare inbox](/screenshot.png)
 
@@ -29,13 +29,11 @@ Thanks to mailflare sponsors. Want to support the project? Drop [@hieuSSR](https
 
 ## How it works
 
-Mailflare runs in your Cloudflare account. Email Routing delivers incoming messages to the app, while Cloudflare's email service handles outgoing messages. Your mail data stays in your own D1 database and attachments are stored in your own R2 bucket.
+Mailflare Free runs in your Cloudflare account. Email Routing delivers incoming messages to the app, while Brevo's HTTP API handles outgoing messages. Your mail data stays in your own D1 database and attachments are stored in your own R2 bucket.
 
 ## How much does it cost?
 
-You can setup Mailflare and receive email for free
-
-A [Paid Worker](https://developers.cloudflare.com/workers/platform/pricing/) plan ($5/month) is required to send email (and it's recommend to have a smooth experience)
+Mailflare Free is designed for the Cloudflare Workers Free plan. Add a `BREVO_API_KEY` to send mail; Brevo's free allowance and sender-domain verification rules apply.
 
 ## Deploy
 
@@ -45,9 +43,7 @@ Getting started takes three steps:
 2. **Complete setup.** Open the deployed app and follow `/setup` to check the installation and create your admin account.
 3. **Connect your domain.** Add a domain managed by the same Cloudflare account. Mailflare configures its email routing and helps you create the first mailbox.
 
-⚠️ IMPORTANT: **`CF_TOKEN` is required during deployment**. Create a scoped [Cloudflare API token with the following permissions](https://github.com/hieunc229/mailflare/issues/24#issuecomment-5523686105) for the domains you want to connect.
-- All accounts - Email Sending:Edit, DNS Settings:Edit, Email Routing Addresses:Edit
-- All zones - DNS Settings:Edit, Email Routing Rules:Edit, Zone Settings:Edit, DNS:Edit
+`CF_TOKEN` and `BREVO_API_KEY` are required during deployment. Use a scoped Cloudflare API token with **Zone Read**, **Email Routing Edit**, and **Email Routing Rules Write** permissions for the domains you want to connect. This runtime token is separate from the token Cloudflare uses to deploy the app.
 
 See the [deployment guide](docs/deployment.md) for required permissions, manual deployment, backups, and updates.
 
@@ -70,4 +66,4 @@ Add your Cloudflare credentials to `.dev.vars`, then open [http://localhost:3000
 
 ## License
 
-See [LICENSE](LICENSE).
+This fork remains licensed under the AGPL-3.0. See [LICENSE](LICENSE).
