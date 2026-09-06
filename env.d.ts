@@ -1,6 +1,6 @@
 interface CloudflareEnv {
 	DB: D1Database;
-	BREVO_API_KEY?: string;
+	SMTP2GO_API_KEY?: string;
 	BUCKET: R2Bucket;
 	INBOUND_QUEUE: Queue<import("./src/lib/email/inbound").InboundQueueMessage>;
 	ASSETS: Fetcher;
