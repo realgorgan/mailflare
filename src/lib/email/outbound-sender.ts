@@ -1,4 +1,4 @@
-import { getEmailAddress, parseEmailAddressParts } from "./address";
+import { getEmailAddress } from "./address";
 import type { AttachmentContent } from "./attachment-types";
 
 export class EmailSenderError extends Error {
@@ -15,18 +15,44 @@ function encodeBase64(content: ArrayBuffer): string {
 	return btoa(binary);
 }
 
-export class BrevoSender implements EmailSender {
+type Smtp2GoResponse = {
+	data?: {
+		failed?: number;
+		email_id?: string;
+		error?: string;
+		failures?: Array<{ error?: string }>;
+	};
+};
+
+export class Smtp2GoSender implements EmailSender {
 	constructor(private readonly apiKey: string) {}
 	async send(input: SendWithProviderInput): Promise<{ messageId: string }> {
-		if (!this.apiKey) throw new EmailSenderError("Email sending is not configured. Add BREVO_API_KEY to this Worker.");
-		const from = parseEmailAddressParts(input.from);
-		const to = parseEmailAddressParts(input.to);
-		const response = await fetch("https://api.brevo.com/v3/smtp/email", { method: "POST", headers: { "api-key": this.apiKey, "content-type": "application/json", accept: "application/json" }, body: JSON.stringify({ sender: { email: getEmailAddress(input.from), ...(from.name ? { name: from.name } : {}) }, to: [{ email: getEmailAddress(input.to), ...(to.name ? { name: to.name } : {}) }], subject: input.subject, ...(input.html ? { htmlContent: input.html } : {}), ...(input.text ? { textContent: input.text } : {}), ...(input.headers ? { headers: input.headers } : {}), ...(input.attachments.length ? { attachment: input.attachments.map((attachment) => ({ name: attachment.filename, content: encodeBase64(attachment.content) })) } : {}) }) });
-		const payload = await response.json().catch(() => null) as { messageId?: string; message?: string } | null;
-		if (!response.ok) throw new EmailSenderError(response.status === 402 || response.status === 429 ? "Brevo's sending limit has been reached. Try again after its quota resets." : payload?.message ?? "Brevo rejected this email.", response.status >= 500 || response.status === 429);
-		if (!payload?.messageId) throw new EmailSenderError("Brevo did not return a message ID.", true);
-		return { messageId: payload.messageId };
+		if (!this.apiKey) throw new EmailSenderError("Email sending is not configured. Add SMTP2GO_API_KEY to this Worker.");
+		const attachments = input.attachments.filter((attachment) => attachment.disposition !== "inline");
+		const inlines = input.attachments.filter((attachment) => attachment.disposition === "inline");
+		const response = await fetch("https://api.smtp2go.com/v3/email/send", {
+			method: "POST",
+			headers: { "X-Smtp2go-Api-Key": this.apiKey, "content-type": "application/json", accept: "application/json" },
+			body: JSON.stringify({
+				sender: input.from,
+				to: [getEmailAddress(input.to)],
+				subject: input.subject,
+				...(input.html ? { html_body: input.html } : {}),
+				...(input.text ? { text_body: input.text } : {}),
+				...(input.headers ? { custom_headers: Object.entries(input.headers).map(([header, value]) => ({ header, value })) } : {}),
+				...(attachments.length ? { attachments: attachments.map((attachment) => ({ filename: attachment.filename, mimetype: attachment.type, fileblob: encodeBase64(attachment.content) })) } : {}),
+				...(inlines.length ? { inlines: inlines.map((attachment) => ({ filename: attachment.contentId ?? attachment.filename, mimetype: attachment.type, fileblob: encodeBase64(attachment.content) })) } : {}),
+			}),
+		});
+		const payload = await response.json().catch(() => null) as Smtp2GoResponse | null;
+		const failure = payload?.data?.error ?? payload?.data?.failures?.find((item) => item.error)?.error;
+		if (!response.ok || (payload?.data?.failed ?? 0) > 0) {
+			const quota = response.status === 402 || response.status === 429;
+			throw new EmailSenderError(quota ? "SMTP2GO's sending limit has been reached. Try again after its quota resets." : failure ?? "SMTP2GO rejected this email.", response.status >= 500 || response.status === 429);
+		}
+		if (!payload?.data?.email_id) throw new EmailSenderError("SMTP2GO did not return an email ID.", true);
+		return { messageId: payload.data.email_id };
 	}
 }
 
-export function getEmailSender(env: CloudflareEnv): EmailSender { return new BrevoSender(env.BREVO_API_KEY ?? ""); }
+export function getEmailSender(env: CloudflareEnv): EmailSender { return new Smtp2GoSender(env.SMTP2GO_API_KEY ?? ""); }
