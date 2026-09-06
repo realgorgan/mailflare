@@ -59,18 +59,11 @@
 			"database_name": "mailflare",
 			"migrations_dir": "drizzle/migrations",
 		},
-		{
-			"database_name": "mailflare",
-			"database_id": "7cd0b539-659c-4d69-97f9-02b2d8684bdf"
-		},
 	],
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
 			"bucket_name": "mailflare-raw",
-		},
-		{
-			"bucket_name": "mailflare-raw"
 		},
 	],
 	"queues": {
